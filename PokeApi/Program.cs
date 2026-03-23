@@ -3,6 +3,7 @@ using PokeApi.API.Mapper;
 using PokeApi.Application.Service;
 using PokeApi.Infrastructure.Data;
 using PokeApi.Infrastructure.Integrations;
+using PokeApiTeste.Handlers;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -22,6 +23,8 @@ builder.Services.AddHttpClient<IPokeApiClient, PokeApiClient>(client =>
 
 builder.Services.AddAutoMapper(typeof(MappingProfile));
 builder.Services.AddScoped<IPokemonService, PokemonService>();
+builder.Services.AddExceptionHandler<UniversalAppExceptionHandler>();
+builder.Services.AddProblemDetails();
 
 var app = builder.Build();
 
@@ -38,8 +41,9 @@ if (app.Environment.IsDevelopment())
     app.UseDeveloperExceptionPage();
 }
 
-app.UseAuthorization();
+app.UseExceptionHandler();
 app.UseHttpsRedirection();
+app.UseAuthorization();
 app.MapControllers();
 app.Run();
 

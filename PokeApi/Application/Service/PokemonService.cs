@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using PokeApi.API.DTOs;
 using PokeApi.Infrastructure.Data;
 using PokeApi.Infrastructure.Integrations;
+using PokeApiTeste.Application.Exceptions;
 using PokeApiTeste.Model;
 
 namespace PokeApi.Application.Service
@@ -45,12 +46,12 @@ namespace PokeApi.Application.Service
         private static string NormalizeColorName(string colorName)
         {
             if (colorName is null)
-                throw new ArgumentNullException(nameof(colorName));
+                throw new PokeApiException(nameof(colorName));
 
             var color = colorName.Trim().ToLowerInvariant();
 
             if (string.IsNullOrWhiteSpace(color))
-                throw new ArgumentException("A cor não pode ser vazia");
+                throw new PokeApiException("A cor não pode ser vazia");
 
             return color;
         }
@@ -71,7 +72,7 @@ namespace PokeApi.Application.Service
                 throw new ArgumentNullException();
 
             if (response.PokemonSpecies == null || !response.PokemonSpecies.Any())
-                throw new ArgumentException("PokéAPI retornou sem pokémons para essa cor");
+                throw new PokeApiException("PokéAPI retornou sem pokémons para essa cor");
 
             return response;
         }
@@ -79,7 +80,7 @@ namespace PokeApi.Application.Service
         private async Task<PokemonColor> PersistFromApiAsync(PokeApiPokemonColorResponse apiResponse, CancellationToken ct)
         {
             if (string.IsNullOrWhiteSpace(apiResponse.Name))
-                throw new ArgumentException("Nome da cor inválido vindo da API");
+                throw new InvalidColorNameException();
 
             var color = new PokemonColor
             {
