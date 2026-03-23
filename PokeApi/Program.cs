@@ -9,6 +9,7 @@ var builder = WebApplication.CreateBuilder(args);
 var ConnectionStringDataBase = builder.Configuration.GetConnectionString("Default");
 
 builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlite(ConnectionStringDataBase));
+builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
@@ -37,6 +38,8 @@ if (app.Environment.IsDevelopment())
     app.UseDeveloperExceptionPage();
 }
 
+app.UseAuthorization();
 app.UseHttpsRedirection();
+app.MapControllers();
 app.Run();
 
