@@ -1,4 +1,6 @@
 using Microsoft.EntityFrameworkCore;
+using PokeApi.API.Mapper;
+using PokeApi.Application.Service;
 using PokeApi.Infrastructure.Data;
 using PokeApi.Infrastructure.Integrations;
 
@@ -17,6 +19,9 @@ builder.Services.AddHttpClient<IPokeApiClient, PokeApiClient>(client =>
     client.DefaultRequestHeaders.Add("User-Agent", config["UserAgent"]!);
 });
 
+builder.Services.AddAutoMapper(typeof(MappingProfile));
+builder.Services.AddScoped<IPokemonService, PokemonService>();
+
 var app = builder.Build();
 
 using (var scope = app.Services.CreateScope())
@@ -29,6 +34,7 @@ if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
+    app.UseDeveloperExceptionPage();
 }
 
 app.UseHttpsRedirection();
