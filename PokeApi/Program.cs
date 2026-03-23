@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using PokeApi.Infrastructure.Data;
+using PokeApi.Infrastructure.Integrations;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -8,6 +9,13 @@ var ConnectionStringDataBase = builder.Configuration.GetConnectionString("Defaul
 builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlite(ConnectionStringDataBase));
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+builder.Services.AddHttpClient<IPokeApiClient, PokeApiClient>(client =>
+{
+    var config = builder.Configuration.GetSection("PokeApi");
+    client.BaseAddress = new Uri(config["BaseUrl"]!);
+    client.DefaultRequestHeaders.Add("User-Agent", config["UserAgent"]!);
+});
 
 var app = builder.Build();
 
