@@ -21,9 +21,12 @@ namespace PokeApiTeste.Handlers
 
         public async ValueTask<bool> TryHandleAsync(HttpContext httpContext, Exception exception, CancellationToken cancellationToken)
         {
+            _logger.LogWarning("🔥 Handler chamado! Tipo: {Tipo}, IsAppException: {IsApp}",
+                exception.GetType().Name, exception is AppException);
+
             if (exception is AppException appException)
             {
-                _logger.LogError(exception, "Erro tratado: {Message}", exception.Message);
+                _logger.LogWarning("✅ É AppException! Status: {Status}", appException.StatusCode);
 
                 httpContext.Response.StatusCode = appException.StatusCode;
                 httpContext.Response.ContentType = "application/json";
@@ -45,6 +48,8 @@ namespace PokeApiTeste.Handlers
                 return true;
             }
 
+
+            _logger.LogWarning("❌ NÃO é AppException");
             return false;
         }
     }

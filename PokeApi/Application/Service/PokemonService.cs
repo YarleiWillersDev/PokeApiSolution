@@ -69,10 +69,10 @@ namespace PokeApi.Application.Service
             var response = await _pokeApi.GetByColorAsync(colorName, ct);
 
             if (response is null)
-                throw new ArgumentNullException();
+                throw new InvalidColorNameException();
 
             if (response.PokemonSpecies == null || !response.PokemonSpecies.Any())
-                throw new PokeApiException("PokéAPI retornou sem pokémons para essa cor");
+                throw new InvalidColorNameException("PokéAPI retornou sem pokémons para essa cor");
 
             return response;
         }
