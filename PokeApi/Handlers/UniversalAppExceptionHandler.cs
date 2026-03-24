@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Diagnostics;
+using Microsoft.AspNetCore.Mvc;
 using PokeApiTeste.Exceptions;
 
 namespace PokeApiTeste.Handlers
@@ -21,13 +22,8 @@ namespace PokeApiTeste.Handlers
 
         public async ValueTask<bool> TryHandleAsync(HttpContext httpContext, Exception exception, CancellationToken cancellationToken)
         {
-            _logger.LogWarning("🔥 Handler chamado! Tipo: {Tipo}, IsAppException: {IsApp}",
-                exception.GetType().Name, exception is AppException);
-
             if (exception is AppException appException)
             {
-                _logger.LogWarning("✅ É AppException! Status: {Status}", appException.StatusCode);
-
                 httpContext.Response.StatusCode = appException.StatusCode;
                 httpContext.Response.ContentType = "application/json";
 
@@ -35,21 +31,18 @@ namespace PokeApiTeste.Handlers
                     ? $"{exception.Message} | Stack: {exception.StackTrace}"
                     : "Erro interno do servidor";
 
-                var response = new
+                var problem = new ProblemDetails
                 {
-                    statusCode = appException.StatusCode,
-                    title = appException.Title,
-                    message = appException.Message,
-                    details = details
+                    Status = appException.StatusCode,
+                    Title = appException.Title,
+                    Detail = appException.Message
                 };
 
-                await httpContext.Response.WriteAsJsonAsync(response, cancellationToken);
+                await httpContext.Response.WriteAsJsonAsync(problem, cancellationToken);
 
                 return true;
             }
 
-
-            _logger.LogWarning("❌ NÃO é AppException");
             return false;
         }
     }

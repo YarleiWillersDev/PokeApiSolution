@@ -25,6 +25,7 @@ builder.Services.AddAutoMapper(typeof(MappingProfile));
 builder.Services.AddScoped<IPokemonService, PokemonService>();
 builder.Services.AddExceptionHandler<UniversalAppExceptionHandler>();
 builder.Services.AddExceptionHandler<DefaultHandler>();
+builder.Services.AddProblemDetails();
 
 var app = builder.Build();
 
@@ -44,10 +45,7 @@ else
     app.UseHsts();
 }
 
-app.UseExceptionHandler(errorApp => { 
-    errorApp.Run(async context => { });
-});
-
+app.UseExceptionHandler();
 app.UseHttpsRedirection();
 app.UseAuthorization();
 app.MapControllers();

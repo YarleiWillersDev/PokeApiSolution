@@ -173,7 +173,7 @@ public class GetByColorAsyncUnitTest
 
         Func<Task> Act = () => fixture.Service.GetByColorAsync("red");
 
-        await Assert.ThrowsExceptionAsync<ArgumentNullException>(Act);
+        await Assert.ThrowsExceptionAsync<PokeApiException>(Act);
 
         fixture.ClientMock.Verify(
             x => x.GetByColorAsync("red", It.IsAny<CancellationToken>()),

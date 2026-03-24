@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Diagnostics;
+using Microsoft.AspNetCore.Mvc;
 
 namespace PokeApiTeste.Handlers
 {
@@ -17,22 +18,23 @@ namespace PokeApiTeste.Handlers
             _env = env;
         }
 
-        public async ValueTask<bool> TryHandleAsync(HttpContext context, Exception exception, CancellationToken ct)
+        public async ValueTask<bool> TryHandleAsync(
+            HttpContext context,
+            Exception exception,
+            CancellationToken cancellationToken)
         {
-            _logger.LogError(exception, "Erro genérico 500: {Message}", exception.Message);
-
-            context.Response.StatusCode = 500;
-            context.Response.ContentType = "application/json";
-
-            var response = new
+            var problem = new ProblemDetails
             {
-                statusCode = 500,
-                title = "Internal Server Error",
-                message = "Algo deu muito errado!",
-                details = _env.IsDevelopment() ? exception.StackTrace ?? "" : "Contate suporte"
+                Status = StatusCodes.Status500InternalServerError,
+                Title = "Internal Server Error",
+                Detail = "Algo deu muito errado!"
             };
 
-            await context.Response.WriteAsJsonAsync(response, ct);
+            context.Response.StatusCode = problem.Status.Value;
+            context.Response.ContentType = "application/json";
+
+            await context.Response.WriteAsJsonAsync(problem, cancellationToken);
+
             return true;
         }
     }
