@@ -8,10 +8,10 @@ namespace PokeApiTeste.Application.Exceptions
 {
     public class InvalidColorNameException : AppException
     {
-        public InvalidColorNameException(string message = "Nome da cor inválido vindo da API.")
-            : base(502, "Invalid External Data", message) { }
+        public InvalidColorNameException(string message = "Nome da cor inválido vindo da API ou do cliente.")
+            : base(400, "Invalid External Data", message) { }
 
         public InvalidColorNameException(string message, Exception inner)
-            : base(502, "Invalid External Data", message, inner) { }
+            : base(400, "Invalid External Data", message, inner) { }
     }
 }

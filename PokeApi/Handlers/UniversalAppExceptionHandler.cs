@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Diagnostics;
+using Microsoft.AspNetCore.Mvc;
 using PokeApiTeste.Exceptions;
 
 namespace PokeApiTeste.Handlers
@@ -23,8 +24,6 @@ namespace PokeApiTeste.Handlers
         {
             if (exception is AppException appException)
             {
-                _logger.LogError(exception, "Erro tratado: {Message}", exception.Message);
-
                 httpContext.Response.StatusCode = appException.StatusCode;
                 httpContext.Response.ContentType = "application/json";
 
@@ -32,15 +31,14 @@ namespace PokeApiTeste.Handlers
                     ? $"{exception.Message} | Stack: {exception.StackTrace}"
                     : "Erro interno do servidor";
 
-                var response = new
+                var problem = new ProblemDetails
                 {
-                    statusCode = appException.StatusCode,
-                    title = appException.Title,
-                    message = appException.Message,
-                    details = details
+                    Status = appException.StatusCode,
+                    Title = appException.Title,
+                    Detail = appException.Message
                 };
 
-                await httpContext.Response.WriteAsJsonAsync(response, cancellationToken);
+                await httpContext.Response.WriteAsJsonAsync(problem, cancellationToken);
 
                 return true;
             }

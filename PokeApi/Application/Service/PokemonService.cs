@@ -35,7 +35,7 @@ namespace PokeApi.Application.Service
             var existing = await FindColorInDatabaseAsync(color, cancellationToken);
             if (existing is not null)
                 return _mapper.Map<ColorPokemonResponseDto>(existing);
-            
+
             var apiResponse = await FetchFromPokeApiAsync(color, cancellationToken);
 
             PokemonColor colorEntity = await PersistFromApiAsync(apiResponse, cancellationToken);
@@ -66,15 +66,34 @@ namespace PokeApi.Application.Service
 
         private async Task<PokeApiPokemonColorResponse> FetchFromPokeApiAsync(string colorName, CancellationToken ct)
         {
-            var response = await _pokeApi.GetByColorAsync(colorName, ct);
+            try
+            {
+                var response = await _pokeApi.GetByColorAsync(colorName, ct);
 
-            if (response is null)
-                throw new ArgumentNullException();
+                if (response is null)
+                    throw new InvalidColorNameException();
 
-            if (response.PokemonSpecies == null || !response.PokemonSpecies.Any())
-                throw new PokeApiException("PokéAPI retornou sem pokémons para essa cor");
+                if (response.PokemonSpecies == null || !response.PokemonSpecies.Any())
+                    throw new InvalidColorNameException("PokéAPI retornou sem pokémons para essa cor");
 
-            return response;
+                return response;
+            }
+            catch (HttpRequestException ex)
+            {
+                if (ex.StatusCode == System.Net.HttpStatusCode.NotFound || ex.StatusCode == System.Net.HttpStatusCode.BadRequest)
+                {
+                    throw new InvalidColorNameException("Cor inválida ou não encontrada na PokeAPI", ex);
+                }
+                throw new PokeApiException("Erro ao acessar a PokeAPI", ex);
+            }
+            catch (TaskCanceledException ex)
+            {
+                throw new PokeApiException("Timeout ao acessar a PokeAPI", ex);
+            }
+            catch (Exception ex)
+            {
+                throw new PokeApiException("Erro inesperado ao acessar a PokeAPI", ex);
+            }
         }
 
         private async Task<PokemonColor> PersistFromApiAsync(PokeApiPokemonColorResponse apiResponse, CancellationToken ct)

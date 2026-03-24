@@ -24,6 +24,7 @@ builder.Services.AddHttpClient<IPokeApiClient, PokeApiClient>(client =>
 builder.Services.AddAutoMapper(typeof(MappingProfile));
 builder.Services.AddScoped<IPokemonService, PokemonService>();
 builder.Services.AddExceptionHandler<UniversalAppExceptionHandler>();
+builder.Services.AddExceptionHandler<DefaultHandler>();
 builder.Services.AddProblemDetails();
 
 var app = builder.Build();
@@ -38,7 +39,10 @@ if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
-    app.UseDeveloperExceptionPage();
+}
+else
+{
+    app.UseHsts();
 }
 
 app.UseExceptionHandler();
@@ -47,3 +51,4 @@ app.UseAuthorization();
 app.MapControllers();
 app.Run();
 
+public partial class Program { }
